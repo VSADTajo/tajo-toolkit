@@ -1,0 +1,12 @@
+import { NestMiddleware } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import { TraceContext } from './trace-context';
+import { TraceModuleOptions } from './types';
+export declare class TraceMiddleware implements NestMiddleware {
+    private readonly traceContext;
+    private readonly options;
+    constructor(traceContext: TraceContext, options: TraceModuleOptions);
+    use(req: Request, res: Response, next: NextFunction): void;
+    private shipLog;
+}
+//# sourceMappingURL=trace.middleware.d.ts.map
