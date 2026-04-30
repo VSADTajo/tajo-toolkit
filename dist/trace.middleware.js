@@ -19,31 +19,35 @@ exports.TraceMiddleware = void 0;
 const common_1 = require("@nestjs/common");
 const uuid_1 = require("uuid");
 const axios_1 = __importDefault(require("axios"));
+const nestjs_cls_1 = require("nestjs-cls");
 const trace_context_1 = require("./trace-context");
 const types_1 = require("./types");
 let TraceMiddleware = class TraceMiddleware {
-    constructor(traceContext, options) {
+    constructor(traceContext, cls, options) {
         this.traceContext = traceContext;
+        this.cls = cls;
         this.options = options;
     }
     use(req, res, next) {
-        const incomingTraceId = req.headers[types_1.X_TRACE_ID_HEADER];
-        const traceId = incomingTraceId && (0, uuid_1.validate)(incomingTraceId)
-            ? incomingTraceId
-            : (0, uuid_1.v4)();
-        const incomingUserId = req.headers[types_1.X_USER_ID_HEADER];
-        this.traceContext.traceId = traceId;
-        this.traceContext.userId = incomingUserId ?? null;
-        this.traceContext.serviceName = this.options.serviceName;
-        this.traceContext.startTime = Date.now();
-        this.traceContext.logsApiUrl = this.options.logsApiUrl;
-        res.setHeader(types_1.X_TRACE_ID_HEADER, traceId);
-        if (this.options.logRequests) {
-            res.on('finish', () => {
-                this.shipLog(req, res);
-            });
-        }
-        next();
+        this.cls.run(() => {
+            const incomingTraceId = req.headers[types_1.X_TRACE_ID_HEADER];
+            const traceId = incomingTraceId && (0, uuid_1.validate)(incomingTraceId)
+                ? incomingTraceId
+                : (0, uuid_1.v4)();
+            const incomingUserId = req.headers[types_1.X_USER_ID_HEADER];
+            this.traceContext.traceId = traceId;
+            this.traceContext.userId = incomingUserId ?? null;
+            this.traceContext.serviceName = this.options.serviceName;
+            this.traceContext.startTime = Date.now();
+            this.traceContext.logsApiUrl = this.options.logsApiUrl;
+            res.setHeader(types_1.X_TRACE_ID_HEADER, traceId);
+            if (this.options.logRequests) {
+                res.on('finish', () => {
+                    this.shipLog(req, res);
+                });
+            }
+            next();
+        });
     }
     shipLog(req, res) {
         const path = req.originalUrl || req.url;
@@ -80,7 +84,8 @@ let TraceMiddleware = class TraceMiddleware {
 exports.TraceMiddleware = TraceMiddleware;
 exports.TraceMiddleware = TraceMiddleware = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, common_1.Inject)(types_1.TRACE_MODULE_OPTIONS)),
-    __metadata("design:paramtypes", [trace_context_1.TraceContext, Object])
+    __param(2, (0, common_1.Inject)(types_1.TRACE_MODULE_OPTIONS)),
+    __metadata("design:paramtypes", [trace_context_1.TraceContext,
+        nestjs_cls_1.ClsService, Object])
 ], TraceMiddleware);
 //# sourceMappingURL=trace.middleware.js.map

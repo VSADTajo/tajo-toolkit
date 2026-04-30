@@ -2,6 +2,7 @@ import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
 import axios from 'axios';
+import { ClsService } from 'nestjs-cls';
 import { TraceContext } from './trace-context';
 import { X_TRACE_ID_HEADER, X_USER_ID_HEADER, TRACE_MODULE_OPTIONS, TraceModuleOptions } from './types';
 
@@ -9,32 +10,35 @@ import { X_TRACE_ID_HEADER, X_USER_ID_HEADER, TRACE_MODULE_OPTIONS, TraceModuleO
 export class TraceMiddleware implements NestMiddleware {
   constructor(
     private readonly traceContext: TraceContext,
+    private readonly cls: ClsService,
     @Inject(TRACE_MODULE_OPTIONS) private readonly options: TraceModuleOptions,
   ) {}
 
   use(req: Request, res: Response, next: NextFunction): void {
-    const incomingTraceId = req.headers[X_TRACE_ID_HEADER] as string | undefined;
-    const traceId = incomingTraceId && uuidValidate(incomingTraceId)
-      ? incomingTraceId
-      : uuidv4();
+    this.cls.run(() => {
+      const incomingTraceId = req.headers[X_TRACE_ID_HEADER] as string | undefined;
+      const traceId = incomingTraceId && uuidValidate(incomingTraceId)
+        ? incomingTraceId
+        : uuidv4();
 
-    const incomingUserId = req.headers[X_USER_ID_HEADER] as string | undefined;
+      const incomingUserId = req.headers[X_USER_ID_HEADER] as string | undefined;
 
-    this.traceContext.traceId = traceId;
-    this.traceContext.userId = incomingUserId ?? null;
-    this.traceContext.serviceName = this.options.serviceName;
-    this.traceContext.startTime = Date.now();
-    this.traceContext.logsApiUrl = this.options.logsApiUrl;
+      this.traceContext.traceId = traceId;
+      this.traceContext.userId = incomingUserId ?? null;
+      this.traceContext.serviceName = this.options.serviceName;
+      this.traceContext.startTime = Date.now();
+      this.traceContext.logsApiUrl = this.options.logsApiUrl;
 
-    res.setHeader(X_TRACE_ID_HEADER, traceId);
+      res.setHeader(X_TRACE_ID_HEADER, traceId);
 
-    if (this.options.logRequests) {
-      res.on('finish', () => {
-        this.shipLog(req, res);
-      });
-    }
+      if (this.options.logRequests) {
+        res.on('finish', () => {
+          this.shipLog(req, res);
+        });
+      }
 
-    next();
+      next();
+    });
   }
 
   private shipLog(req: Request, res: Response): void {
