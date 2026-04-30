@@ -17,34 +17,39 @@ let TraceContext = class TraceContext {
         this.cls = cls;
     }
     get traceId() {
-        return this.cls.get('traceId') ?? null;
+        return this.cls.isActive() ? (this.cls.get('traceId') ?? null) : null;
     }
     set traceId(value) {
-        this.cls.set('traceId', value);
+        if (this.cls.isActive())
+            this.cls.set('traceId', value);
     }
     get userId() {
-        return this.cls.get('userId') ?? null;
+        return this.cls.isActive() ? (this.cls.get('userId') ?? null) : null;
     }
     set userId(value) {
-        this.cls.set('userId', value ?? null);
+        if (this.cls.isActive())
+            this.cls.set('userId', value ?? null);
     }
     get serviceName() {
-        return this.cls.get('serviceName') ?? '';
+        return this.cls.isActive() ? (this.cls.get('serviceName') ?? '') : '';
     }
     set serviceName(value) {
-        this.cls.set('serviceName', value);
+        if (this.cls.isActive())
+            this.cls.set('serviceName', value);
     }
     get startTime() {
-        return this.cls.get('startTime') ?? Date.now();
+        return this.cls.isActive() ? (this.cls.get('startTime') ?? Date.now()) : Date.now();
     }
     set startTime(value) {
-        this.cls.set('startTime', value);
+        if (this.cls.isActive())
+            this.cls.set('startTime', value);
     }
     get logsApiUrl() {
-        return this.cls.get('logsApiUrl') ?? '';
+        return this.cls.isActive() ? (this.cls.get('logsApiUrl') ?? '') : '';
     }
     set logsApiUrl(value) {
-        this.cls.set('logsApiUrl', value);
+        if (this.cls.isActive())
+            this.cls.set('logsApiUrl', value);
     }
 };
 exports.TraceContext = TraceContext;
