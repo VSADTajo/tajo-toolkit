@@ -28,9 +28,11 @@ export class TraceMiddleware implements NestMiddleware {
 
     res.setHeader(X_TRACE_ID_HEADER, traceId);
 
-    res.on('finish', () => {
-      this.shipLog(req, res);
-    });
+    if (this.options.logRequests) {
+      res.on('finish', () => {
+        this.shipLog(req, res);
+      });
+    }
 
     next();
   }
@@ -63,7 +65,11 @@ export class TraceMiddleware implements NestMiddleware {
 
     const logsApiUrl = this.traceContext.logsApiUrl;
     if (logsApiUrl) {
-      axios.post(`${logsApiUrl}/api/logs/ingest`, payload).catch(() => {});
+      const headers: Record<string, string> = {};
+      if (this.options.apiKey) {
+        headers['x-api-key'] = this.options.apiKey;
+      }
+      axios.post(`${logsApiUrl}/api/logs`, payload, { headers }).catch(() => {});
     }
   }
 }

@@ -38,9 +38,11 @@ let TraceMiddleware = class TraceMiddleware {
         this.traceContext.startTime = Date.now();
         this.traceContext.logsApiUrl = this.options.logsApiUrl;
         res.setHeader(types_1.X_TRACE_ID_HEADER, traceId);
-        res.on('finish', () => {
-            this.shipLog(req, res);
-        });
+        if (this.options.logRequests) {
+            res.on('finish', () => {
+                this.shipLog(req, res);
+            });
+        }
         next();
     }
     shipLog(req, res) {
@@ -67,7 +69,11 @@ let TraceMiddleware = class TraceMiddleware {
         };
         const logsApiUrl = this.traceContext.logsApiUrl;
         if (logsApiUrl) {
-            axios_1.default.post(`${logsApiUrl}/api/logs/ingest`, payload).catch(() => { });
+            const headers = {};
+            if (this.options.apiKey) {
+                headers['x-api-key'] = this.options.apiKey;
+            }
+            axios_1.default.post(`${logsApiUrl}/api/logs`, payload, { headers }).catch(() => { });
         }
     }
 };

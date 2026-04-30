@@ -1,6 +1,8 @@
 export interface TraceModuleOptions {
     serviceName: string;
     logsApiUrl: string;
+    apiKey?: string;
+    logRequests?: boolean;
 }
 export declare const X_TRACE_ID_HEADER = "x-trace-id";
 export declare const X_USER_ID_HEADER = "x-user-id";

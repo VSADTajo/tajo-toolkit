@@ -42,7 +42,11 @@ function default_1(opts) {
                     ...(obj.err ? { error: obj.err.message, stack: obj.err.stack } : {}),
                 },
             };
-            axios_1.default.post(`${opts.logsApiUrl}/api/logs/ingest`, payload).catch(() => { });
+            const headers = {};
+            if (opts.apiKey) {
+                headers['x-api-key'] = opts.apiKey;
+            }
+            axios_1.default.post(`${opts.logsApiUrl}/api/logs`, payload, { headers }).catch(() => { });
         }
     });
 }

@@ -17,6 +17,7 @@ function mapLevel(pinoLevel: number): string {
 export interface PinoLogsApiTransportOptions {
   logsApiUrl: string;
   serviceName: string;
+  apiKey?: string;
 }
 
 export default function (opts: PinoLogsApiTransportOptions) {
@@ -47,7 +48,11 @@ export default function (opts: PinoLogsApiTransportOptions) {
         },
       };
 
-      axios.post(`${opts.logsApiUrl}/api/logs/ingest`, payload).catch(() => {});
+      const headers: Record<string, string> = {};
+      if (opts.apiKey) {
+        headers['x-api-key'] = opts.apiKey;
+      }
+      axios.post(`${opts.logsApiUrl}/api/logs`, payload, { headers }).catch(() => {});
     }
   });
 }
