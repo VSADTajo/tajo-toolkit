@@ -47,14 +47,14 @@ function default_1(opts) {
             }
             // Extract application-level metadata (entity, event, ids, etc.)
             const appMeta = extractAppMeta(obj);
-            // Use domain entity from log object if provided, otherwise serviceName
-            const entity = (typeof appMeta.entity === 'string' && appMeta.entity)
-                ? appMeta.entity
-                : opts.serviceName;
-            delete appMeta.entity;
+            // Move domain entity into meta.domain, keep entity as serviceName
+            if (typeof appMeta.entity === 'string' && appMeta.entity) {
+                appMeta.domain = appMeta.entity;
+                delete appMeta.entity;
+            }
             const payload = {
                 level,
-                entity,
+                entity: opts.serviceName,
                 message: message || `[${obj.req?.method || 'LOG'}] ${reqUrl || 'system'} ${obj.res?.statusCode || ''}`.trim(),
                 source: opts.serviceName,
                 correlationId: reqId,
