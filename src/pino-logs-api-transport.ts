@@ -18,7 +18,7 @@ function mapLevel(pinoLevel: number): string {
 const PINO_INTERNAL_KEYS = new Set([
   'level', 'time', 'pid', 'hostname', 'name', 'msg', 'message',
   'req', 'res', 'responseTime', 'err',
-  'reqId', 'context',
+  'reqId', 'traceId', 'context',
   // nestjs-pino adds these
   'v',
 ]);
@@ -44,7 +44,7 @@ export default function (opts: PinoLogsApiTransportOptions) {
     for await (const obj of source) {
       const level = mapLevel(obj.level);
       const message = obj.msg || obj.message || '';
-      const reqId = obj.req?.id || obj.reqId || null;
+      const reqId = obj.req?.id || obj.reqId || obj.traceId || null;
 
       // Skip health endpoint logs
       const reqUrl = obj.req?.url || '';
