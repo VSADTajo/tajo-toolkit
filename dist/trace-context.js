@@ -51,6 +51,12 @@ let TraceContext = class TraceContext {
         if (this.cls.isActive())
             this.cls.set('logsApiUrl', value);
     }
+    async runInContext(traceId, fn) {
+        return this.cls.run(async () => {
+            this.traceId = traceId;
+            return fn();
+        });
+    }
 };
 exports.TraceContext = TraceContext;
 exports.TraceContext = TraceContext = __decorate([

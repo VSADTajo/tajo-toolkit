@@ -12,5 +12,6 @@ export declare class TraceContext {
     set startTime(value: number);
     get logsApiUrl(): string;
     set logsApiUrl(value: string);
+    runInContext<T>(traceId: string, fn: () => Promise<T>): Promise<T>;
 }
 //# sourceMappingURL=trace-context.d.ts.map

@@ -44,4 +44,11 @@ export class TraceContext {
   set logsApiUrl(value: string) {
     if (this.cls.isActive()) this.cls.set('logsApiUrl', value);
   }
+
+  async runInContext<T>(traceId: string, fn: () => Promise<T>): Promise<T> {
+    return this.cls.run(async () => {
+      this.traceId = traceId;
+      return fn();
+    });
+  }
 }
